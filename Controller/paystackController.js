@@ -1,20 +1,30 @@
 const paystackModel = require("../Model/paystackModel");
+const paystackAPIs = require("../paystackAPIs");
 
-const purchaseProduct = async (req, res) => {
-  const { orderId, productName, amountPaid, email } = req.body;
+class PaystackController {
+
+  purchaseProduct = async (req, res) => {
+    const { orderId, productName, amount, email, callbackUrl, name } = req.body;
 
   //validating payment information
-  if (![orderId, productName, amountPaid, email]) {
+  if (![orderId, productName, amount, email, callbackUrl, name]) {
     return res.status(400).json("Unable to validate information");
   }
 
   const paymentDetails = {
-    orderId,
-    productName,
-    amountPaid,
+    amount,
     email,
-    paymentReference,
+    callback_url: callbackUrl,
+    metadata: { amount, email, name },
   };
-};
 
-module.exports = { purchaseProduct };
+  const data = await paystackAPIs.initializePayment(paymentDetails);
+
+  return res.status(201).send({
+    message: 'Payment initialized successfully',
+    data,
+  });
+};
+}
+
+module.exports = new PaystackController();
